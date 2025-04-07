@@ -290,52 +290,56 @@ def chat_view(request, ad_id, user_id):
     ad = get_object_or_404(Ad, id=ad_id)
     contact_user = get_object_or_404(User, id=user_id)
 
-    if request.user != ad.user and contact_user != ad.user:
-        return HttpResponseForbidden("Nie masz dostępu do tej rozmowy.")
 
-    if request.method == 'POST':
-        text = request.POST.get('text')
-        if text.strip():
-            Message.objects.create(
-                sender=request.user,
-                receiver=contact_user,
-                ad=ad,
-                text=text.strip()
-            )
-            return redirect('chat', ad_id=ad.id, user_id=contact_user.id)
-
-    messages_qs = Message.objects.filter(
+    chat_messages = Message.objects.filter(
         ad=ad,
         sender__in=[request.user, contact_user],
         receiver__in=[request.user, contact_user]
     )
 
+    chat_messages.filter(receiver=request.user, is_read=False).update(is_read=True)
+
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        image = request.FILES.get('image')
+
+        if text or image:
+            Message.objects.create(
+                sender=request.user,
+                receiver=contact_user,
+                ad=ad,
+                text=text or "",
+                image=image
+            )
+            return redirect('chat', ad_id=ad.id, user_id=contact_user.id)
+
     return render(request, 'chat.html', {
-        'chat_messages': messages_qs,
         'ad': ad,
-        'contact_user': contact_user
+        'contact_user': contact_user,
+        'chat_messages': chat_messages
     })
 
 @login_required
 def inbox_view(request):
-    user = request.user
-    messages = Message.objects.filter(Q(sender=user) | Q(receiver=user)).order_by('-created_at')
+    conversations = []
 
-    conversations = {}
-    for msg in messages:
-        if msg.sender == user:
-            contact = msg.receiver
-        else:
-            contact = msg.sender
+    messages = Message.objects.filter(sender=request.user) | Message.objects.filter(receiver=request.user)
+    messages = messages.select_related('ad', 'sender', 'receiver')
 
-        key = (contact.id, msg.ad.id)
-        if key not in conversations:
-            conversations[key] = {
-                'contact': contact,
+    convo_map = {}
+
+    for msg in messages.order_by('-created_at'):
+        contact = msg.receiver if msg.sender == request.user else msg.sender
+        key = (msg.ad.id, contact.id)
+
+        if key not in convo_map:
+            convo_map[key] = {
                 'ad': msg.ad,
-                'last_message': msg
+                'contact': contact,
+                'last_message': msg,
+                'has_unread': msg.receiver == request.user and not msg.is_read,
             }
 
-    return render(request, 'inbox.html', {
-        'conversations': conversations.values()
-    })
+    conversations = list(convo_map.values())
+
+    return render(request, 'inbox.html', {'conversations': conversations})

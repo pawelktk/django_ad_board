@@ -1,36 +1,85 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h4 class="mb-4">📨 Rozmowa z <strong>{{ contact_user.username }}</strong></h4>
-  <p><small>Ogłoszenie: <a href="{% url 'ad_detail' ad.id %}">{{ ad.title }}</a></small></p>
+  <h4 class="mb-1">
+    📨 Rozmowa z <strong>{{ contact_user.username }}</strong>
+    {% if contact_user.is_online %}<span class="badge bg-success ms-2">Online</span>{% endif %}
+  </h4>
+  <p class="mb-3"><small>Ogłoszenie: <a href="{% url 'ad_detail' ad.id %}">{{ ad.title }}</a></small></p>
 
-  <div id="chat-box" class="border rounded p-3 mb-3 bg-white shadow-sm" style="max-height: 400px; overflow-y: auto;">
+  <div id="chat-box" class="border rounded p-3 mb-3 bg-white shadow-sm" style="max-height: 700px; overflow-y: auto;">
     {% for msg in chat_messages %}
       <div class="mb-3 {% if msg.sender == request.user %}text-end{% endif %}">
-        <div class="d-inline-block p-2 px-3 rounded-pill {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light border{% endif %}">
+        <div class="d-inline-block p-2 px-3 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light border{% endif %}">
           {{ msg.text }}
+          {% if msg.image %}
+            <div class="mt-2">
+              <img src="{{ msg.image.url }}" alt="Załącznik" class="img-fluid rounded" style="max-height: 200px;">
+            </div>
+          {% endif %}
         </div><br>
-        <small class="text-muted {% if msg.sender == request.user %}me-2{% else %}ms-2{% endif %}">
-          {{ msg.created_at|date:"Y-m-d H:i" }}
-        </small>
+        <small class="text-muted">{{ msg.created_at|date:"Y-m-d H:i" }}</small>
       </div>
     {% empty %}
       <p class="text-muted">Brak wiadomości w tej rozmowie.</p>
     {% endfor %}
   </div>
 
-  <form method="post" autocomplete="off">
-    {% csrf_token %}
-    <div class="input-group">
-      <input type="text" name="text" class="form-control" placeholder="Napisz wiadomość..." required>
-      <button class="btn btn-primary">Wyślij</button>
-    </div>
-  </form>
+<form method="post" enctype="multipart/form-data" class="mt-3" autocomplete="off">
+  {% csrf_token %}
+  <div class="input-group align-items-center">
+    <input type="text" name="text" class="form-control" placeholder="Napisz wiadomość..." required>
+    
+    <label class="btn btn-outline-secondary mb-0" for="file-input">
+      📎
+    </label>
+    <input type="file" name="image" id="file-input" class="d-none" accept="image/*">
+    
+    <button class="btn btn-primary" type="submit">Wyślij</button>
+  </div>
+
+  <!-- Podgląd załącznika -->
+  <div id="file-preview" style="display: none !important;" class="mt-2 d-flex align-items-center gap-3" >
+    <img id="preview-image" src="#" alt="Podgląd" class="rounded shadow" style="height: 100px;">
+    <button type="button" id="remove-file" class="btn btn-sm btn-outline-danger">🗑️ Usuń</button>
+  </div>
+</form>
+
 </div>
 
 <script>
-  // Auto scroll to bottom
   const chatBox = document.getElementById('chat-box');
-  chatBox.scrollTop = chatBox.scrollHeight;
+  chatBox.scrollTop = chatBox.scrollHeight- chatBox.clientHeight;
 </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.getElementById("file-input");
+    const previewContainer = document.getElementById("file-preview");
+    const previewImage = document.getElementById("preview-image");
+    const removeBtn = document.getElementById("remove-file");
+
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImage.src = e.target.result;
+          previewContainer.style.setProperty("display", "flex", "important");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewContainer.style.setProperty("display", "none", "important");
+      }
+    });
+
+    removeBtn.addEventListener("click", function () {
+      fileInput.value = "";
+      previewImage.src = "#";
+      previewContainer.style.setProperty("display", "none", "important");
+    });
+  });
+</script>
+
+
 {% endblock %}

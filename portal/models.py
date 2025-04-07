@@ -26,7 +26,7 @@ class Ad(models.Model):
         super().save(*args, **kwargs)
 
     def is_expired(self):
-        return self.expires_at and datetime.now() > self.expires_at
+        return self.expires_at and timezone.now() > self.expires_at
     
     def __str__(self):
         return self.title
@@ -47,6 +47,8 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     ad = models.ForeignKey(Ad, on_delete=models.CASCADE)
     text = models.TextField()
+    image = models.ImageField(upload_to='chat_images/', blank=True, null=True)
+    is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return f"{self.sender} ➡ {self.receiver} ({self.ad.title}): {self.text[:30]}"
