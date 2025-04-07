@@ -57,7 +57,6 @@ def ad_detail(request, ad_id):
     return render(request, 'ad_detail.html', {'ad': ad})
 
 @login_required
-@login_required
 def ad_create(request):
     if request.method == 'POST':
         form = AdForm(request.POST, request.FILES)

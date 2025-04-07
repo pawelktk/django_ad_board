@@ -1,18 +1,24 @@
 {% extends 'base.html' %}
+{% load form_tags %}
 {% block content %}
-<h2>📬 Formularz kontaktowy</h2>
-
-<form method="post" class="mt-3">
-    {% csrf_token %}
-    {% for field in form %}
-        <div class="mb-3">
-            <label class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-                <div class="text-danger small">{{ field.errors }}</div>
-            {% endif %}
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">📬 Formularz kontaktowy</h2>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field|add_class:"form-control" }}
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-100">Wyślij</button>
+            </form>
         </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-primary">Wyślij</button>
-</form>
+    </div>
+</div>
 {% endblock %}
