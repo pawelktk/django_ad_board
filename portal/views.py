@@ -218,14 +218,16 @@ def add_recommendation(request, user_id):
 def admin_recommendations_panel(request):
     recs = UserRecommendation.objects.select_related('from_user', 'to_user').order_by('-created_at')
 
-    user_id = request.GET.get('user')
+    query = request.GET.get('query')
     opinion_type = request.GET.get('type')
-    if user_id:
-        recs = recs.filter(to_user__id=user_id)
+
+    if query:
+        recs = recs.filter(comment__icontains=query)
     if opinion_type == 'positive':
         recs = recs.filter(is_positive=True)
     elif opinion_type == 'negative':
         recs = recs.filter(is_positive=False)
+
 
     last_week = date.today() - timedelta(days=6)
     daily_stats = (
