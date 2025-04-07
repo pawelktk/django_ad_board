@@ -40,3 +40,15 @@ class UserRecommendation(models.Model):
 
     class Meta:
         unique_together = ('from_user', 'to_user')
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    ad = models.ForeignKey(Ad, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.sender} ➡ {self.receiver} ({self.ad.title}): {self.text[:30]}"
+
+    class Meta:
+        ordering = ['created_at']

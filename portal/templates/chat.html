@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h4>📨 Rozmowa z {{ contact_user.username }} o ogłoszeniu <a href="{% url 'ad_detail' ad.id %}">{{ ad.title }}</a></h4>
+  <div class="border rounded p-3 mb-3" style="max-height: 400px; overflow-y: auto;">
+    {% for msg in chat_messages %}
+      <div class="mb-2 {% if msg.sender == request.user %}text-end{% endif %}">
+        <div class="p-2 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}">
+          {{ msg.text }}
+        </div>
+        <small class="text-muted">{{ msg.created_at|date:"Y-m-d H:i" }}</small>
+      </div>
+    {% empty %}
+      <p>Brak wiadomości.</p>
+    {% endfor %}
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="input-group">
+      <input type="text" name="text" class="form-control" placeholder="Napisz wiadomość..." required>
+      <button class="btn btn-outline-primary">Wyślij</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

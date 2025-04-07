@@ -22,6 +22,8 @@ urlpatterns = [
 	path('admin-opinie/usun/<int:rec_id>/', views.delete_recommendation, name='delete_recommendation'),
 	path('opinie/zglos/<int:rec_id>/', views.report_recommendation, name='report_recommendation'),
 	path('admin-opinie/export/', views.export_recommendations_csv, name='export_recommendations'),
+	path('inbox/<int:ad_id>/<int:user_id>/', views.chat_view, name='chat'),
+	path('inbox/', views.inbox_view, name='inbox'),
 ]
 
 from django.conf import settings

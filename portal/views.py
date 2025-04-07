@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Ad, Category, UserRecommendation
+from .models import Ad, Category, UserRecommendation, Message
 from .forms import AdForm, ContactForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -279,3 +279,58 @@ def export_recommendations_csv(request):
         ])
 
     return response
+
+@login_required
+def chat_view(request, ad_id, user_id):
+    ad = get_object_or_404(Ad, id=ad_id)
+    contact_user = get_object_or_404(User, id=user_id)
+
+    if request.user != ad.user and contact_user != ad.user:
+        return HttpResponseForbidden("Nie masz dostępu do tej rozmowy.")
+
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        if text.strip():
+            Message.objects.create(
+                sender=request.user,
+                receiver=contact_user,
+                ad=ad,
+                text=text.strip()
+            )
+            return redirect('chat', ad_id=ad.id, user_id=contact_user.id)
+
+    messages_qs = Message.objects.filter(
+        ad=ad,
+        sender__in=[request.user, contact_user],
+        receiver__in=[request.user, contact_user]
+    )
+
+    return render(request, 'chat.html', {
+        'chat_messages': messages_qs,
+        'ad': ad,
+        'contact_user': contact_user
+    })
+
+@login_required
+def inbox_view(request):
+    user = request.user
+    messages = Message.objects.filter(Q(sender=user) | Q(receiver=user)).order_by('-created_at')
+
+    conversations = {}
+    for msg in messages:
+        if msg.sender == user:
+            contact = msg.receiver
+        else:
+            contact = msg.sender
+
+        key = (contact.id, msg.ad.id)
+        if key not in conversations:
+            conversations[key] = {
+                'contact': contact,
+                'ad': msg.ad,
+                'last_message': msg
+            }
+
+    return render(request, 'inbox.html', {
+        'conversations': conversations.values()
+    })

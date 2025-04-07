@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>📥 Twoje rozmowy</h3>
+
+  {% if conversations %}
+    <ul class="list-group">
+      {% for convo in conversations %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            Rozmowa z <strong>{{ convo.contact.username }}</strong> o <a href="{% url 'ad_detail' convo.ad.id %}">{{ convo.ad.title }}</a>
+            <br>
+            <small class="text-muted">{{ convo.last_message.created_at|date:"Y-m-d H:i" }}</small>
+          </div>
+          <a href="{% url 'chat' convo.ad.id convo.contact.id %}" class="btn btn-sm btn-outline-primary">Otwórz</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">Nie masz żadnych rozmów.</p>
+  {% endif %}
+</div>
+{% endblock %}
