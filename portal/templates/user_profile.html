@@ -78,9 +78,17 @@
       {% else %}
         <span class="text-danger">Nie poleca</span>
       {% endif %}
+      {% if request.user != rec.from_user %}
+		  <form action="{% url 'report_recommendation' rec.id %}" method="post" class="d-inline ms-2">
+			{% csrf_token %}
+			<button class="btn btn-sm btn-outline-danger" onclick="return confirm('Zgłosić tę opinię jako obraźliwą lub spam?');">Zgłoś</button>
+		  </form>
+	  {% endif %}
       {% if rec.comment %}
         <br><small class="text-muted">{{ rec.comment }}</small>
       {% endif %}
+
+
     </li>
     {% empty %}
     <li class="list-group-item">Brak opinii.</li>

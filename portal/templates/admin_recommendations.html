@@ -28,6 +28,7 @@
         <th>Typ</th>
         <th>Komentarz</th>
         <th>Data</th>
+        <th>Zgłoszona?</th>
         <th>Akcje</th>
       </tr>
     </thead>
@@ -46,6 +47,14 @@
         </td>
         <td>{{ rec.comment|default:"(brak)" }}</td>
         <td>{{ rec.created_at|date:"Y-m-d H:i" }}</td>
+		<td>
+		  {% if rec.is_reported %}
+			<span class="badge bg-danger">⚠️ Tak</span>
+		  {% else %}
+			<center>-</center>
+		  {% endif %}
+		</td>
+
         <td>
           <a href="{% url 'delete_recommendation' rec.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno usunąć tę opinię?');">Usuń</a>
         </td>

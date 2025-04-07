@@ -36,6 +36,7 @@ class UserRecommendation(models.Model):
     is_positive = models.BooleanField(default=True)
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_reported = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('from_user', 'to_user')

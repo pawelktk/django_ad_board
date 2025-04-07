@@ -13,6 +13,8 @@ from django.core.mail import send_mail
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models.functions import TruncDate
+from datetime import timedelta, date
 
 
 def ad_list(request):
@@ -215,7 +217,6 @@ def add_recommendation(request, user_id):
 def admin_recommendations_panel(request):
     recs = UserRecommendation.objects.select_related('from_user', 'to_user').order_by('-created_at')
 
-    # Filtrowanie
     user_id = request.GET.get('user')
     opinion_type = request.GET.get('type')
     if user_id:
@@ -225,8 +226,18 @@ def admin_recommendations_panel(request):
     elif opinion_type == 'negative':
         recs = recs.filter(is_positive=False)
 
+    last_week = date.today() - timedelta(days=6)
+    daily_stats = (
+        UserRecommendation.objects.filter(created_at__date__gte=last_week)
+        .annotate(day=TruncDate('created_at'))
+        .values('day')
+        .annotate(count=Count('id'))
+        .order_by('day')
+    )
+
     return render(request, 'admin_recommendations.html', {
-        'recommendations': recs
+        'recommendations': recs,
+        'daily_stats': daily_stats,
     })
 
 @staff_member_required
@@ -235,3 +246,11 @@ def delete_recommendation(request, rec_id):
     rec.delete()
     messages.success(request, "Opinia została usunięta.")
     return redirect('admin_recommendations')
+@login_required
+def report_recommendation(request, rec_id):
+    rec = get_object_or_404(UserRecommendation, id=rec_id)
+    rec.is_reported = True
+    rec.save()
+    messages.warning(request, "Zgłoszono opinię do moderatora.")
+    return redirect('user_profile', rec.to_user.id)
+

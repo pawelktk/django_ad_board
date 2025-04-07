@@ -20,6 +20,7 @@ urlpatterns = [
     path('uzytkownik/<int:user_id>/dodaj-opinie/', views.add_recommendation, name='add_recommendation'),
     path('admin-opinie/', views.admin_recommendations_panel, name='admin_recommendations'),
 	path('admin-opinie/usun/<int:rec_id>/', views.delete_recommendation, name='delete_recommendation'),
+	path('opinie/zglos/<int:rec_id>/', views.report_recommendation, name='report_recommendation'),
 ]
 
 from django.conf import settings
