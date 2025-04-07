@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Portal Ogłoszeniowy{% endblock %}</title>
@@ -10,6 +11,8 @@
 
     <!-- Optional: Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
 
     <style>
         body {
