@@ -68,6 +68,18 @@
       {% endfor %}
     </tbody>
   </table>
+	<h5 class="mt-4">📊 Opinie dodane w ostatnich 7 dniach:</h5>
+	<ul class="list-group mb-4">
+	  {% for stat in daily_stats %}
+		<li class="list-group-item d-flex justify-content-between">
+		  <span>{{ stat.day }}</span>
+		  <span><strong>{{ stat.count }}</strong> opinii</span>
+		</li>
+	  {% empty %}
+		<li class="list-group-item">Brak opinii w ostatnich 7 dniach.</li>
+	  {% endfor %}
+	</ul>
+
   <a href="{% url 'export_recommendations' %}" class="btn btn-outline-secondary mb-3">
     📥 Eksportuj do CSV
   </a>
