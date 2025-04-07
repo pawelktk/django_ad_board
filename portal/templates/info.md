@@ -1,0 +1,1 @@
+Templatki zostały przepuszczone przez chatGPT w celu polepszenia layoutu.
