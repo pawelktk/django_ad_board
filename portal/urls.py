@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin-opinie/', views.admin_recommendations_panel, name='admin_recommendations'),
 	path('admin-opinie/usun/<int:rec_id>/', views.delete_recommendation, name='delete_recommendation'),
 	path('opinie/zglos/<int:rec_id>/', views.report_recommendation, name='report_recommendation'),
+	path('admin-opinie/export/', views.export_recommendations_csv, name='export_recommendations'),
 ]
 
 from django.conf import settings

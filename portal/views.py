@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models.functions import TruncDate
 from datetime import timedelta, date
+import csv
 
 
 def ad_list(request):
@@ -254,3 +255,25 @@ def report_recommendation(request, rec_id):
     messages.warning(request, "Zgłoszono opinię do moderatora.")
     return redirect('user_profile', rec.to_user.id)
 
+@staff_member_required
+def export_recommendations_csv(request):
+    recs = UserRecommendation.objects.select_related('from_user', 'to_user').all()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="opinie.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Od', 'Dla', 'Typ', 'Komentarz', 'Data', 'Zgłoszona'])
+
+    for r in recs:
+        writer.writerow([
+            r.id,
+            r.from_user.username,
+            r.to_user.username,
+            'Polecenie' if r.is_positive else 'Niepolecenie',
+            r.comment,
+            r.created_at.strftime("%Y-%m-%d %H:%M"),
+            'TAK' if r.is_reported else ''
+        ])
+
+    return response
