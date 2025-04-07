@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">👤 Profil użytkownika: {{ profile_user.username }}</h2>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-primary">
+        <div class="card-body">
+          <h5 class="card-title">📊 Statystyki</h5>
+          <p>Liczba ogłoszeń: <strong>{{ stats.total_ads }}</strong></p>
+          <p>Aktywne ogłoszenia: <strong>{{ stats.active_ads }}</strong></p>
+          <p>👍 Polecenia: <strong>{{ stats.positive_recommendations }}</strong></p>
+          <p>👎 Niepolecenia: <strong>{{ stats.negative_recommendations }}</strong></p>
+        </div>
+      </div>
+    </div>
+
+    {% if can_recommend %}
+    <div class="col-md-6">
+      <div class="card shadow-sm border-success">
+        <div class="card-body">
+          <h5 class="card-title">📝 Dodaj swoją opinię</h5>
+          <form method="post" action="{% url 'add_recommendation' profile_user.id %}">
+            {% csrf_token %}
+            <div class="form-group mb-2">
+              <label for="rec_type">Typ opinii</label>
+              <select name="is_positive" class="form-select">
+                <option value="true">Polecam</option>
+                <option value="false">Nie polecam</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Komentarz (opcjonalnie)</label>
+              <textarea name="comment" class="form-control" rows="3"></textarea>
+            </div>
+            <button class="btn btn-success mt-3">Dodaj opinię</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <hr class="my-4">
+
+  <h3 class="mb-3">📢 Ogłoszenia użytkownika</h3>
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for ad in ads %}
+    <div class="col">
+      <div class="card h-100">
+        {% if ad.image %}
+          <img src="{{ ad.image.url }}" class="card-img-top" alt="Ogłoszenie">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ ad.title }}</h5>
+          <p>{{ ad.description|truncatewords:25 }}</p>
+          <a href="{% url 'ad_detail' ad.id %}" class="btn btn-primary btn-sm">Zobacz</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p>Brak ogłoszeń.</p>
+    {% endfor %}
+  </div>
+
+  <hr class="my-4">
+
+  <h4 class="mt-4">💬 Opinie innych użytkowników</h4>
+  <ul class="list-group my-3">
+    {% for rec in recommendations %}
+    <li class="list-group-item">
+      <strong>{{ rec.from_user.username }}</strong>:
+      {% if rec.is_positive %}
+        <span class="text-success">Poleca</span>
+      {% else %}
+        <span class="text-danger">Nie poleca</span>
+      {% endif %}
+      {% if rec.comment %}
+        <br><small class="text-muted">{{ rec.comment }}</small>
+      {% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item">Brak opinii.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

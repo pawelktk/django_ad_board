@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">📄 Lista ogłoszeń</h2>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+    	{% if query is None %}
+    		<input type="text" name="q" value="" class="form-control" placeholder="Szukaj ogłoszeń...">
+    	{% else %}
+        	<input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Szukaj ogłoszeń...">
+        {% endif %}
+    </div>
+    <div class="col-md-3">
+        <select name="category" class="form-select">
+            <option value="">-- Wszystkie kategorie --</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filtruj</button>
+    </div>
+    
+	<div class="mb-3">
+	  <label for="sort">Sortuj według:</label>
+	  <select id="sort" name="sort" class="form-select w-auto d-inline" onchange="this.form.submit()">
+		<option value="">Daty (najnowsze)</option>
+		<option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Ceny rosnąco</option>
+		<option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Ceny malejąco</option>
+	  </select>
+	</div>
+
+
+</form>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for ad in page_obj.object_list %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            {% if ad.image %}
+            <img src="{{ ad.image.url }}" class="card-img-top" alt="Ogłoszenie">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ ad.title }}</h5>
+                <p class="card-text text-muted mb-1">{{ ad.category.name }} — <a href="{% url 'user_profile' ad.user.id %}">{{ ad.user.username }}</a></p>
+                {% if ad.price %}
+                <p class="card-text fw-bold">{{ ad.price }} zł</p>
+                {% endif %}
+                <a href="{% url 'ad_detail' ad.id %}" class="btn btn-primary mt-auto">Zobacz</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Brak ogłoszeń.</p>
+    {% endfor %}
+</div>
+
+
+
+<nav aria-label="Paginacja" class="mt-4">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+      </li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endblock %}

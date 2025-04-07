@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow">
+    <div class="card-body">
+      <h4 class="card-title">{{ is_update|yesno:"Edytuj opinię,Dodaj opinię" }} o użytkowniku <strong>{{ profile_user.username }}</strong></h4>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.is_positive.label_tag }}
+          {{ form.is_positive }}
+        </div>
+        <div class="mb-3">
+          {{ form.comment.label_tag }}
+          {{ form.comment }}
+        </div>
+        <button type="submit" class="btn btn-success">Zapisz opinię</button>
+        <a href="{% url 'user_profile' profile_user.id %}" class="btn btn-secondary">Anuluj</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

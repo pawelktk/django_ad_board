@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">{{ ad.title }}</h2>
+        <p class="text-muted">Kategoria: {{ ad.category.name }}</p>
+        <p class="card-text">{{ ad.description|linebreaks }}</p>
+        <p>Autor: <a href="{% url 'user_profile' ad.user.id %}">{{ ad.user.username }}</a></p>
+        <p><strong>Cena:</strong> {{ ad.price }} zł</p>
+        
+		{% if ad.image %}
+		  <p><img src="{{ ad.image.url }}" class="img-fluid mb-3" alt="Obraz ogłoszenia"></p>
+		{% endif %}
+
+        {% if user == ad.user or request.user.is_staff %}
+            <a href="{% url 'ad_edit' ad.id %}" class="btn btn-warning">Edytuj</a>
+            <a href="{% url 'ad_delete' ad.id %}" class="btn btn-danger">Usuń</a>
+        {% endif %}
+        <a href="/" class="btn btn-secondary">Wróć</a>
+		{% if user.is_authenticated %}
+		  <form method="post" action="{% url 'toggle_favorite' ad.id %}">
+			{% csrf_token %}
+			<button type="submit" class="btn btn-outline-danger mt-3">
+			  {% if user in ad.favorites.all %}
+				❤️ Usuń z ulubionych
+			  {% else %}
+				🤍 Dodaj do ulubionych
+			  {% endif %}
+			</button>
+		  </form>
+		{% endif %}
+
+        
+    </div>
+</div>
+{% endblock %}

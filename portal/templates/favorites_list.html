@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>⭐ Twoje ulubione ogłoszenia</h2>
+{% for ad in ads %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ ad.title }}</h5>
+      <p>{{ ad.description|truncatewords:20 }}</p>
+      <a href="{% url 'ad_detail' ad.id %}" class="btn btn-primary">Zobacz</a>
+    </div>
+  </div>
+{% empty %}
+  <p>Brak ulubionych ogłoszeń.</p>
+{% endfor %}
+{% endblock %}

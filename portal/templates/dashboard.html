@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>📊 Panel użytkownika</h2>
+
+<h4 class="mt-4">📝 Twoje ogłoszenia</h4>
+{% for ad in user_ads %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ ad.title }}</h5>
+      <p>{{ ad.description|truncatewords:20 }}</p>
+      <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-primary">Zobacz</a>
+      <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-warning">Edytuj</a>
+      <a href="{% url 'ad_delete' ad.id %}" class="btn btn-sm btn-danger">Usuń</a>
+    </div>
+  </div>
+{% empty %}
+  <p>Nie masz jeszcze żadnych ogłoszeń.</p>
+{% endfor %}
+
+<h4 class="mt-4">⭐ Ulubione ogłoszenia</h4>
+{% for ad in favorites %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ ad.title }}</h5>
+      <p>{{ ad.description|truncatewords:20 }}</p>
+      <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-primary">Zobacz</a>
+    </div>
+  </div>
+{% empty %}
+  <p>Brak ulubionych ogłoszeń.</p>
+{% endfor %}
+
+{% endblock %}

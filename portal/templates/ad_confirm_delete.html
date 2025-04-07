@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>🗑️ Potwierdź usunięcie</h2>
+<p>Czy na pewno chcesz usunąć ogłoszenie: <strong>{{ ad.title }}</strong>?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Usuń</button>
+    <a href="{% url 'ad_detail' ad.id %}" class="btn btn-secondary">Anuluj</a>
+</form>
+{% endblock %}
