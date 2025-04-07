@@ -1,33 +1,161 @@
 {% extends 'base.html' %}
+{% block title %}Panel użytkownika{% endblock %}
 {% block content %}
-<h2>📊 Panel użytkownika</h2>
 
-<h4 class="mt-4">📝 Twoje ogłoszenia</h4>
-{% for ad in user_ads %}
-  <div class="card mb-3">
-    <div class="card-body">
-      <h5>{{ ad.title }}</h5>
-      <p>{{ ad.description|truncatewords:20 }}</p>
-      <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-primary">Zobacz</a>
-      <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-warning">Edytuj</a>
-      <a href="{% url 'ad_delete' ad.id %}" class="btn btn-sm btn-danger">Usuń</a>
+<h2 class="mb-4">📊 Panel użytkownika</h2>
+
+<!-- Statystyki -->
+<div class="row mb-5">
+  <div class="col-md-6">
+    <div class="card text-bg-light shadow-sm border-0">
+      <div class="card-body d-flex align-items-center">
+        <div class="me-3 display-5">📄</div>
+        <div>
+          <h5 class="card-title mb-1">Twoje ogłoszenia</h5>
+          <p class="card-text">{{ user_ads|length }} ogłoszeń</p>
+        </div>
+      </div>
     </div>
   </div>
-{% empty %}
-  <p>Nie masz jeszcze żadnych ogłoszeń.</p>
-{% endfor %}
-
-<h4 class="mt-4">⭐ Ulubione ogłoszenia</h4>
-{% for ad in favorites %}
-  <div class="card mb-3">
-    <div class="card-body">
-      <h5>{{ ad.title }}</h5>
-      <p>{{ ad.description|truncatewords:20 }}</p>
-      <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-primary">Zobacz</a>
+  <div class="col-md-6">
+    <div class="card text-bg-light shadow-sm border-0">
+      <div class="card-body d-flex align-items-center">
+        <div class="me-3 display-5">⭐</div>
+        <div>
+          <h5 class="card-title mb-1">Ulubione</h5>
+          <p class="card-text">{{ favorites|length }} ogłoszeń</p>
+        </div>
+      </div>
     </div>
   </div>
-{% empty %}
-  <p>Brak ulubionych ogłoszeń.</p>
-{% endfor %}
+</div>
+
+<!-- Twoje ogłoszenia -->
+<section class="mb-5">
+  <h4 class="mb-3">📝 Twoje ogłoszenia</h4>
+
+  {% if user_ads %}
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for ad in user_ads %}
+    <div class="col">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="row g-0 h-100">
+          {% if ad.image %}
+          <div class="col-4">
+            <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="img-fluid rounded-start h-100 object-fit-cover">
+          </div>
+          {% endif %}
+          <div class="col">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ ad.title }}</h5>
+              <p class="card-text text-muted">{{ ad.description|truncatewords:20 }}</p>
+              <div class="mt-auto">
+                <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-outline-primary me-2">🔍 Zobacz</a>
+                <a href="{% url 'ad_edit' ad.id %}" class="btn btn-sm btn-outline-warning me-2">✏️ Edytuj</a>
+                <a href="{% url 'ad_delete' ad.id %}" class="btn btn-sm btn-outline-danger">🗑️ Usuń</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="alert alert-info mt-3">Nie masz jeszcze żadnych ogłoszeń.</div>
+  {% endif %}
+</section>
+
+<!-- Ulubione -->
+<section>
+  <h4 class="mb-3">⭐ Ulubione ogłoszenia</h4>
+
+  {% if favorites %}
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for ad in favorites %}
+    <div class="col">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="row g-0 h-100">
+          {% if ad.image %}
+          <div class="col-4">
+            <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="img-fluid rounded-start h-100 object-fit-cover">
+          </div>
+          {% endif %}
+          <div class="col">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ ad.title }}</h5>
+              <p class="card-text text-muted">{{ ad.description|truncatewords:20 }}</p>
+              <div class="mt-auto">
+                <a href="{% url 'ad_detail' ad.id %}" class="btn btn-sm btn-outline-primary">🔍 Zobacz</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="alert alert-secondary mt-3">Brak ulubionych ogłoszeń.</div>
+  {% endif %}
+</section>
+
+<!-- Ostatnia aktywność -->
+<section class="mt-5">
+  <h4 class="mb-3">📌 Ostatnia aktywność</h4>
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+
+    <!-- Wiadomości -->
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">📬 Ostatnie wiadomości</div>
+        <div class="card-body">
+          {% if recent_messages %}
+            <ul class="list-group list-group-flush">
+              {% for msg in recent_messages %}
+              <li class="list-group-item">
+                <strong>Od:</strong> {{ msg.sender.username }}<br>
+                <small class="text-muted">{{ msg.created_at|date:"d.m.Y H:i" }}</small><br>
+                <span>{{ msg.text|truncatewords:12 }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+            <a href="{% url 'inbox' %}" class="btn btn-sm btn-outline-primary mt-3">📥 Zobacz wszystkie</a>
+          {% else %}
+            <p class="text-muted">Brak nowych wiadomości.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Rekomendacje -->
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-header bg-success text-white">💬 Rekomendacje</div>
+        <div class="card-body">
+          {% if recent_recommendations %}
+            <ul class="list-group list-group-flush">
+              {% for rec in recent_recommendations %}
+              <li class="list-group-item">
+                <strong>Od:</strong> {{ rec.from_user.username }}
+				  {% if rec.is_positive %}
+					<span class="text-success">Poleca</span>
+				  {% else %}
+					<span class="text-danger">Nie poleca</span>
+				  {% endif %}<br>
+                <span>{{ rec.comment|truncatewords:15 }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">Brak opinii jeszcze.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 
 {% endblock %}

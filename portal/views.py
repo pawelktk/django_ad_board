@@ -153,10 +153,16 @@ def favorites_list(request):
 def user_dashboard(request):
     user_ads = Ad.objects.filter(user=request.user).order_by('-created_at')
     favorites = request.user.favorite_ads.all()
-    return render(request, 'dashboard.html', {
+    recent_messages = Message.objects.filter(receiver=request.user).order_by('-created_at')[:5]
+    recent_recommendations = UserRecommendation.objects.filter(to_user=request.user).order_by('-created_at')[:3]
+
+    context = {
         'user_ads': user_ads,
         'favorites': favorites,
-    })
+        'recent_messages': recent_messages,
+        'recent_recommendations': recent_recommendations,
+    }
+    return render(request, 'dashboard.html', context)
 
 @staff_member_required
 def admin_dashboard(request):

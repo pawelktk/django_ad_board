@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h3>📥 Twoje rozmowy</h3>
+  <h3 class="mb-4">📥 Twoje rozmowy</h3>
 
   {% if conversations %}
-    <ul class="list-group">
+    <div class="list-group shadow-sm rounded">
       {% for convo in conversations %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            Rozmowa z <strong>{{ convo.contact.username }}</strong> o <a href="{% url 'ad_detail' convo.ad.id %}">{{ convo.ad.title }}</a>
-            <br>
+        <a href="{% url 'chat' convo.ad.id convo.contact.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">💬 {{ convo.contact.username }}</div>
+            <small>Ogłoszenie: <strong>{{ convo.ad.title }}</strong></small><br>
             <small class="text-muted">{{ convo.last_message.created_at|date:"Y-m-d H:i" }}</small>
           </div>
-          <a href="{% url 'chat' convo.ad.id convo.contact.id %}" class="btn btn-sm btn-outline-primary">Otwórz</a>
-        </li>
+          <span class="badge bg-primary rounded-pill align-self-center">Otwórz</span>
+        </a>
       {% endfor %}
-    </ul>
+    </div>
   {% else %}
-    <p class="text-muted">Nie masz żadnych rozmów.</p>
+    <p class="text-muted">Nie masz jeszcze żadnych rozmów.</p>
   {% endif %}
 </div>
 {% endblock %}
