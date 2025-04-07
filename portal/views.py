@@ -14,6 +14,7 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
 
+
 def ad_list(request):
     category_id = request.GET.get('category')
     query = request.GET.get('q')
@@ -210,3 +211,27 @@ def add_recommendation(request, user_id):
 
     return redirect('user_profile', user_id=user_id)
 
+@staff_member_required
+def admin_recommendations_panel(request):
+    recs = UserRecommendation.objects.select_related('from_user', 'to_user').order_by('-created_at')
+
+    # Filtrowanie
+    user_id = request.GET.get('user')
+    opinion_type = request.GET.get('type')
+    if user_id:
+        recs = recs.filter(to_user__id=user_id)
+    if opinion_type == 'positive':
+        recs = recs.filter(is_positive=True)
+    elif opinion_type == 'negative':
+        recs = recs.filter(is_positive=False)
+
+    return render(request, 'admin_recommendations.html', {
+        'recommendations': recs
+    })
+
+@staff_member_required
+def delete_recommendation(request, rec_id):
+    rec = get_object_or_404(UserRecommendation, id=rec_id)
+    rec.delete()
+    messages.success(request, "Opinia została usunięta.")
+    return redirect('admin_recommendations')

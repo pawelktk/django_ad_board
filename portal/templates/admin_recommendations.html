@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>🛡️ Panel admina – Opinie użytkowników</h2>
+
+  <form method="get" class="row row-cols-lg-auto g-3 align-items-center my-3">
+    <div class="col">
+      <input type="number" name="user" class="form-control" placeholder="ID użytkownika" value="{{ request.GET.user }}">
+    </div>
+    <div class="col">
+      <select name="type" class="form-select">
+        <option value="">Wszystkie</option>
+        <option value="positive" {% if request.GET.type == 'positive' %}selected{% endif %}>Polecenia</option>
+        <option value="negative" {% if request.GET.type == 'negative' %}selected{% endif %}>Niepolecenia</option>
+      </select>
+    </div>
+    <div class="col">
+      <button type="submit" class="btn btn-outline-primary">Filtruj</button>
+    </div>
+  </form>
+
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Od</th>
+        <th>Dla</th>
+        <th>Typ</th>
+        <th>Komentarz</th>
+        <th>Data</th>
+        <th>Akcje</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rec in recommendations %}
+      <tr>
+        <td>{{ rec.id }}</td>
+        <td><a href="{% url 'user_profile' rec.from_user.id %}">{{ rec.from_user.username }}</a></td>
+        <td><a href="{% url 'user_profile' rec.to_user.id %}">{{ rec.to_user.username }}</a></td>
+        <td>
+          {% if rec.is_positive %}
+            <span class="text-success">Poleca</span>
+          {% else %}
+            <span class="text-danger">Nie poleca</span>
+          {% endif %}
+        </td>
+        <td>{{ rec.comment|default:"(brak)" }}</td>
+        <td>{{ rec.created_at|date:"Y-m-d H:i" }}</td>
+        <td>
+          <a href="{% url 'delete_recommendation' rec.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno usunąć tę opinię?');">Usuń</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
